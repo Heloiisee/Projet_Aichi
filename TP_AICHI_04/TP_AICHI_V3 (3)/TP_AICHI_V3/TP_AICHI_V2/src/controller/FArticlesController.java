@@ -1,138 +1,71 @@
-package controller;
+package viewsAccueil;
 
-import viewsAccueil.FArticlesView;
-import model.UserDAO;
-import model.Article;
+import controller.Clientcontroller;
+import controller.FArticlesController;
+import view.ClientView;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
+public class FAccueilController {
+    private final FAccueilView view;
 
-public class FArticlesController {
-    private final FArticlesView view;
-    private final UserDAO userDAO;
-
-    public FArticlesController(FArticlesView view) {
+    public FAccueilController(FAccueilView view) {
         this.view = view;
-        this.userDAO = new UserDAO();
         initController();
+
     }
 
     public void initController() {
-        view.addAjouterListener(new AjouterListener());
-        view.addModifierListener(new ModifierListener());
-        view.addSupprimerListener(new SupprimerListener());
-        view.addEffacerListener(new EffacerListener());
-        view.addAfficherListener(new AfficherListener());
-
+        view.addQuitterListener(new QuitterListener());
+        view.addArticlesListener(new ArticlesListener());
+        view.addClientsListener(new ClientsListener());
+        view.addCommandesListener(new CommandesListener());
     }
 
-    // Listener pour l'ajout d'articles
-    class AjouterListener implements ActionListener {
+    static class QuitterListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Vérifier que tous les champs sont remplis
-            if (view.getTxtLibelle().getText().isEmpty() || view.getTxtDescription().getText().isEmpty() || view.getTxtPrix().getText().isEmpty() || view.getSliderStock().getValue() == 0) {
-                JOptionPane.showMessageDialog(view, "Veuillez remplir tous les champs.");
-                return;
-            }
-
-            try {
-                // Récupérer les données de la vue
-                String libelle = view.getTxtLibelle().getText();
-                String description = view.getTxtDescription().getText();
-                double prix = Double.parseDouble(view.getTxtPrix().getText().replace(",", "."));
-                int stock = view.getSliderStock().getValue();
-
-                // Créer un objet Article
-                Article article = new Article(libelle, description, prix, stock);
-
-                // Ajouter l'article à la base de données
-                userDAO.ajouterArticle(article);
-                userDAO.afficherArticles();
-                view.effacerSaisie();
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(view, "Erreur de format de nombre : " + ex.getMessage());
-            }
-        }
-    }
-    // Listener pour la modification d'articles
-    class ModifierListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            // Récupérer les données de la vue
-            if(view.getTxtLibelle().getText().isEmpty() || view.getTxtDescription().getText().isEmpty() || view.getTxtPrix().getText().isEmpty() || view.getSliderStock().getValue() == 0) {
-                JOptionPane.showMessageDialog(view, "Veuillez remplir tous les champs.");
-                return;
-            }
-            try {
-                // Récupérer les données de la vue
-                int id = getSelectedArticleId(); // Méthode pour obtenir l'ID de l'article sélectionné
-                String libelle = view.getTxtLibelle().getText();
-                String description = view.getTxtDescription().getText();
-                double prix = Double.parseDouble(view.getTxtPrix().getText().replace(",", "."));
-                int stock = (int) view.getSliderStock().getValue();
-
-                // Créer un objet Article
-                Article article = new Article(id, libelle, description, prix, stock);
-
-                // Modifier l'article dans la base de données
-                userDAO.modifierArticle(article);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(view, "Erreur de format de nombre : " + ex.getMessage());
-            }
-
+            System.exit(0);
         }
     }
 
-    // Listener pour la suppression d'articles
-    class SupprimerListener implements ActionListener {
+    class ArticlesListener implements ActionListener {
         @Override
-
         public void actionPerformed(ActionEvent e) {
-
-            // Récupérer l'ID de l'article sélectionné
-            int id = getSelectedArticleId(); // Méthode pour obtenir l'ID de l'article sélectionné
-
-            // Créer un objet Article
-            Article article = new Article(id);
-
-            // Supprimer l'article de la base de données
-            userDAO.supprimerArticle(article);
+            view.setInfoText("Affichage des Articles");
+            afficherArticles();
         }
     }
 
-    // Listener pour effacer la saisie
-    class EffacerListener implements ActionListener {
+
+    class ClientsListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(view.getTxtLibelle().getText().isEmpty() && view.getTxtDescription().getText().isEmpty() && view.getTxtPrix().getText().isEmpty() && view.getSliderStock().getValue() == 0) {
-                JOptionPane.showMessageDialog(view, "Les champs sont déjà vides.");
-                return;
-            }
-            try {
-                // Effacer les champs de saisie
-                view.effacerSaisie();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(view, "Erreur lors de l'effacement des champs : " + ex.getMessage());
-            }
 
+            view.setInfoText("Affichage des Clients");
+            afficherClients();
         }
     }
 
-    class AfficherListener implements ActionListener {
+    class CommandesListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Afficher les articles
-
-            userDAO.afficherArticles();
+            view.setInfoText("Affichage des Commandes");
         }
     }
 
-    // Méthode pour obtenir l'ID de l'article sélectionné
-    private int getSelectedArticleId() {
+    protected void afficherArticles() {
+        FArticlesView laFenetre = new FArticlesView(this);
+        laFenetre.setVisible(true);
+        FArticlesController controller = new FArticlesController(laFenetre);
+        controller.initController();
+    }
 
-        return 0;
+    protected void afficherClients() {
+        ClientView laFenetre = new ClientView(this);
+        laFenetre.setVisible(true);
+        Clientcontroller controller = new Clientcontroller(laFenetre);
+        controller.initController();
+
     }
 }
