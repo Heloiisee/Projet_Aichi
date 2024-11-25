@@ -1,6 +1,8 @@
 package model;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
     private static Connection connection;
@@ -118,8 +120,7 @@ public class UserDAO {
     public void ajouterArticle(Article article) {
         String sql = "INSERT INTO articles (libellé, description, prix, stock) VALUES (?, ?, ?, ?)";
         try (Connection conn = getConnection()) {
-
-            if (conn == null || connection.isClosed()) {
+            if (conn == null && connection == null || connection.isClosed()) {
                 System.err.println("Impossible d'ajouter l'article : connexion à la base de données échouée.");
                 return;
             }
@@ -131,7 +132,6 @@ public class UserDAO {
                 stmt.setInt(4, article.getStock());
                 stmt.executeUpdate();
                 System.out.println("Article ajouté avec succès.");
-                System.out.println(connection);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -157,15 +157,12 @@ public class UserDAO {
 
     public void afficherArticles() {
         String sql = "SELECT * FROM articles";
-        /*try (Connection conn = getConnection()) {
-            System.out.println(connection);
-            if (conn == null ) {
+        try (Connection conn = getConnection()) {
+            if (conn == null && connection == null || connection.isClosed()) {
                 System.err.println("Impossible d'afficher les articles : connexion à la base de données échouée.");
                 return;
-            }*/
-        ConnectionDAO connection = new ConnectionDAO();
-        System.out.println(connection.getConnection());
-            try (Statement stmt = connection.getConnection().createStatement();
+            }
+            try (Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
 
                 while (rs.next()) {
@@ -175,15 +172,39 @@ public class UserDAO {
                     double prix = rs.getDouble("prix");
                     int stock = rs.getInt("stock");
 
-                    System.out.println("ID: " + id + ", Libellé: " + libelle + ", Description: " + description + ", Prix: " + prix + ", Stock: " + stock);
+                    System.out.println( " Libellé: " + libelle + ", Description: " + description + ", Prix: " + prix + ", Stock: " + stock);
                 }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
-    /*} catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-        }*/
+        }
     }
+
+    public List<Article> getArticles() {
+        List<Article> articles = new ArrayList<>();
+        String sql = "SELECT * FROM articles";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String libelle = rs.getString("libellé");
+                String description = rs.getString("description");
+                double prix = rs.getDouble("prix");
+                int stock = rs.getInt("stock");
+
+                articles.add(new Article(id, libelle, description, prix, stock));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return articles;
+    }
+
+
+
 
     public void modifierArticle(Article article) {
         String sql = "UPDATE articles SET libellé = ?, description = ?, prix = ?, stock = ? WHERE id = ?";
