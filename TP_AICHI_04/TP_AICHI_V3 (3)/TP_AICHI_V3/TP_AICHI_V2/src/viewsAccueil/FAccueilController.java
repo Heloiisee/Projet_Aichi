@@ -1,4 +1,4 @@
-package viewsAccueil;
+ package viewsAccueil;
 
 import controller.Clientcontroller;
 import controller.FArticlesController;
