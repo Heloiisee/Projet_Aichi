@@ -1,8 +1,8 @@
 package controller;
-import model.Client;
-import view.ClientView;
-import model.UserDAO;
 
+import model.Client;
+import model.UserDAO;
+import view.ClientView;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -23,8 +23,8 @@ public class Clientcontroller {
     }
 
     public Clientcontroller(ClientView view) {
-
         this.view = view;
+        this.userDAO = new UserDAO();
     }
 
     public void initController() {
@@ -32,8 +32,8 @@ public class Clientcontroller {
         view.getActionModifier().addActionListener(e -> modifierClient());
         view.getActionSupprimer().addActionListener(e -> supprimerClient());
         view.getActionEffacer().addActionListener(e -> effacerSaisie());
+        view.getActionAfficher().addActionListener(e -> afficherClients());
         view.getActionRetour().addActionListener(e -> retourAccueil());
-
     }
 
     private void ajouterClient() {
@@ -42,22 +42,23 @@ public class Clientcontroller {
         String numero = view.getNumeroClient().getText();
         String mail = view.getMailClient().getText();
 
-        Client client = new Client(nom, prenom, numero, mail);
         if (nom.isEmpty() || prenom.isEmpty() || numero.isEmpty() || mail.isEmpty()) {
             JOptionPane.showMessageDialog(view, "Veuillez remplir tous les champs.");
             return;
         }
+
+        Client client = new Client(nom, prenom, numero, mail);
         try {
             userDAO.ajouterClient(client);
             view.showMessage("Client ajouté avec succès !");
             clients.add(client);
             view.updateClientList(clients);
             effacerSaisie();
+            List<Client> updatedClients = userDAO.getClientList();
+            view.afficherClientsDansTable(updatedClients);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Erreur lors de l'ajout du client." + e.getMessage());
+            JOptionPane.showMessageDialog(view, "Erreur lors de l'ajout du client: " + e.getMessage());
         }
-
-
     }
 
     private void modifierClient() {
@@ -74,7 +75,7 @@ public class Clientcontroller {
                 view.updateClientList(clients);
                 effacerSaisie();
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(view, "Erreur lors de la modification du client." + e.getMessage());
+                JOptionPane.showMessageDialog(view, "Erreur lors de la modification du client: " + e.getMessage());
             }
         } else {
             JOptionPane.showMessageDialog(view, "Veuillez sélectionner un client à modifier.");
@@ -84,9 +85,16 @@ public class Clientcontroller {
     private void supprimerClient() {
         int selectedIndex = view.getClientList().getSelectedIndex();
         if (selectedIndex != -1) {
-            clients.remove(selectedIndex);
-            view.updateClientList(clients);
-            effacerSaisie();
+            Client client = clients.get(selectedIndex);
+            try {
+                userDAO.supprimerClient(client.getId());
+                clients.remove(selectedIndex);
+                view.updateClientList(clients);
+                effacerSaisie();
+                view.showMessage("Client supprimé avec succès !");
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(view, "Erreur lors de la suppression du client: " + e.getMessage());
+            }
         } else {
             JOptionPane.showMessageDialog(view, "Veuillez sélectionner un client à supprimer.");
         }
@@ -97,20 +105,18 @@ public class Clientcontroller {
         view.getPrenomClient().setText("");
         view.getNumeroClient().setText("");
         view.getMailClient().setText("");
-
-
     }
+
     private void retourAccueil() {
         view.setVisible(false);
-
     }
+
     public void afficherClients() {
         try {
-            userDAO.afficherClients();
+            clients = userDAO.getClientList();
             view.updateClientList(clients);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(view, "Erreur lors de l'affichage des clients." + e.getMessage());
+            JOptionPane.showMessageDialog(view, "Erreur lors de l'affichage des clients: " + e.getMessage());
         }
     }
-
 }
