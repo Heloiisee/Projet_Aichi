@@ -21,6 +21,7 @@ public class ClientView extends JFrame {
     private JButton actionAfficher;
     private JList<Client> clientList;
     private DefaultListModel<Client> listModel;
+    private JTable clientTable;
 
     public ClientView(FAccueilController fAccueilController) {
         setTitle("Gestion des Clients");
@@ -115,6 +116,15 @@ public class ClientView extends JFrame {
         gbc.gridwidth = 2;
         panel.add(scrollPane, gbc);
 
+        clientTable = new JTable();
+        JScrollPane scrollPaneTable = new JScrollPane(clientTable);
+        scrollPaneTable.setPreferredSize(new Dimension(500, 200));
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        gbc.gridwidth = 2;
+        panel.add(scrollPaneTable, gbc);
+        
+
         actionRetour = new JButton("Retour à l'accueil");
         gbc.gridx = 0;
         gbc.gridy = 8;
@@ -169,13 +179,14 @@ public class ClientView extends JFrame {
     }
 
     public void afficherClientsDansTable(List<Client> clients) {
-        DefaultTableModel model = new DefaultTableModel();
+        DefaultTableModel model = (DefaultTableModel) clientTable.getModel();
         model.addColumn("Nom");
         model.addColumn("Prénom");
         model.addColumn("Numéro");
         model.addColumn("Mail");
+        model.setRowCount(0); // Clear the table
         for (Client client : clients) {
-            model.addRow(new Object[]{client.getNom(), client.getPrenom(), client.getNumero(), client.getEmail()});
+            model.addRow(new Object[]{client.getNom(), client.getPrenom(), client.getNumero(), client.getMail()});
         }
     }
 
