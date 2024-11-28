@@ -63,7 +63,7 @@ public class UserDAO {
         if (connection == null || connection.isClosed()) {
             throw new SQLException("Connection is not established or is closed.");
         }
-        String query = "INSERT INTO clients (nom, prenom, numero, email) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO clients (nom, prenom, numero, mail) VALUES (?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, client.getNom());
             preparedStatement.setString(2, client.getPrenom());
@@ -84,11 +84,31 @@ public class UserDAO {
         }
     }
 
+    public List<Client> getClientList() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            throw new SQLException("Connection is not established or is closed.");
+        }
+        List<Client> clients = new ArrayList<>();
+        String query = "SELECT * FROM clients";
+        try (Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String nom = resultSet.getString("nom");
+                String prenom = resultSet.getString("prenom");
+                String numero = resultSet.getString("numero");
+                String mail = resultSet.getString("mail");
+                clients.add(new Client(id, nom, prenom, numero, mail));
+            }
+        }
+        return clients;
+    }
+
     public void modifierClient(Client client) throws SQLException {
         if (connection == null || connection.isClosed()) {
             throw new SQLException("Connection is not established or is closed.");
         }
-        String query = "UPDATE clients SET nom = ?, prenom = ?, numero = ?, email = ? WHERE id = ?";
+        String query = "UPDATE clients SET nom = ?, prenom = ?, numero = ?, mail = ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, client.getNom());
             preparedStatement.setString(2, client.getPrenom());
