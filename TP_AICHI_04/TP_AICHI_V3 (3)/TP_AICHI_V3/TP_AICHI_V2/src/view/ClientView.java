@@ -4,6 +4,7 @@ import model.Client;
 import viewsAccueil.FAccueilController;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
@@ -17,12 +18,13 @@ public class ClientView extends JFrame {
     private JButton actionSupprimer;
     private JButton actionEffacer;
     private JButton actionRetour;
+    private JButton actionAfficher;
     private JList<Client> clientList;
     private DefaultListModel<Client> listModel;
 
     public ClientView(FAccueilController fAccueilController) {
         setTitle("Gestion des Clients");
-        setSize(400, 400);
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initUI();
@@ -32,7 +34,7 @@ public class ClientView extends JFrame {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10);
 
         JLabel nomLabel = new JLabel("Nom:");
         gbc.gridx = 0;
@@ -64,7 +66,7 @@ public class ClientView extends JFrame {
         gbc.gridy = 2;
         panel.add(numeroClient, gbc);
 
-        JLabel mailLabel = new JLabel("Email:");
+        JLabel mailLabel = new JLabel("Mail:");
         gbc.gridx = 0;
         gbc.gridy = 3;
         panel.add(mailLabel, gbc);
@@ -77,56 +79,60 @@ public class ClientView extends JFrame {
         actionAjouter = new JButton("Ajouter");
         gbc.gridx = 0;
         gbc.gridy = 4;
+        gbc.gridwidth = 1;
         panel.add(actionAjouter, gbc);
 
         actionModifier = new JButton("Modifier");
         gbc.gridx = 1;
         gbc.gridy = 4;
+        gbc.gridwidth = 1;
         panel.add(actionModifier, gbc);
 
         actionSupprimer = new JButton("Supprimer");
         gbc.gridx = 0;
         gbc.gridy = 5;
+        gbc.gridwidth = 1;
         panel.add(actionSupprimer, gbc);
 
         actionEffacer = new JButton("Effacer");
         gbc.gridx = 1;
         gbc.gridy = 5;
+        gbc.gridwidth = 1;
         panel.add(actionEffacer, gbc);
+
+        actionAfficher = new JButton("Afficher");
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 1;
+        panel.add(actionAfficher, gbc);
 
         listModel = new DefaultListModel<>();
         clientList = new JList<>(listModel);
         JScrollPane scrollPane = new JScrollPane(clientList);
-        scrollPane.setPreferredSize(new Dimension(300, 100));
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
-        panel.add(scrollPane, gbc);
-        actionRetour = new JButton("Retour à l'accueil");
+        scrollPane.setPreferredSize(new Dimension(500, 200));
         gbc.gridx = 0;
         gbc.gridy = 7;
         gbc.gridwidth = 2;
-        panel.add(actionRetour, gbc);
+        panel.add(scrollPane, gbc);
 
+        actionRetour = new JButton("Retour à l'accueil");
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        gbc.gridwidth = 2;
+        panel.add(actionRetour, gbc);
 
         add(panel);
     }
 
-    public JTextField getNomClient(
-
-    ) {
+    public JTextField getNomClient() {
         return nomClient;
     }
 
-    public JTextField getPrenomClient(
-
-    ) {
+    public JTextField getPrenomClient() {
         return prenomClient;
     }
 
-    public JTextField getNumeroClient(
-
-    ) {
+    public JTextField getNumeroClient() {
         return numeroClient;
     }
 
@@ -154,15 +160,28 @@ public class ClientView extends JFrame {
         return actionRetour;
     }
 
+    public JButton getActionAfficher() {
+        return actionAfficher;
+    }
+
     public JList<Client> getClientList() {
         return clientList;
     }
 
-
+    public void afficherClientsDansTable(List<Client> clients) {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Nom");
+        model.addColumn("Prénom");
+        model.addColumn("Numéro");
+        model.addColumn("Mail");
+        for (Client client : clients) {
+            model.addRow(new Object[]{client.getNom(), client.getPrenom(), client.getNumero(), client.getEmail()});
+        }
+    }
 
     public void updateClientList(List<Client> clients) {
         listModel.clear();
-        if(clients != null){
+        if (clients != null) {
             for (Client client : clients) {
                 listModel.addElement(client);
             }
@@ -170,9 +189,6 @@ public class ClientView extends JFrame {
     }
 
     public void showMessage(String s) {
-
         JOptionPane.showMessageDialog(this, s);
     }
-
-
 }
