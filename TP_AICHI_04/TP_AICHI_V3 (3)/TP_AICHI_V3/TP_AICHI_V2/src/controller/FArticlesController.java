@@ -1,3 +1,4 @@
+
 package controller;
 
 import viewsAccueil.FArticlesView;
@@ -8,6 +9,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.ArrayList;
 
 
 public class FArticlesController {
@@ -130,10 +132,13 @@ public class FArticlesController {
 
             // Mettre à jour la table dans la vue
             view.afficherArticlesDansTable(articles);
+            view.updateArticleList(articles);
         }
     }
 
-
+    public List<Article> rechercherArticlesParNom(String nom) {
+        return userDAO.rechercherArticlesParNom(nom);
+    }
 
     // Méthode pour obtenir l'ID de l'article sélectionné
     private int getSelectedArticleId() {
@@ -141,3 +146,4 @@ public class FArticlesController {
         return 0;
     }
 }
+
