@@ -4,202 +4,164 @@ import model.Client;
 import viewsAccueil.FAccueilController;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 public class ClientView extends JFrame {
-    private JTextField nomClient;
-    private JTextField prenomClient;
-    private JTextField numeroClient;
-    private JTextField mailClient;
-    private JButton actionAjouter;
-    private JButton actionModifier;
-    private JButton actionSupprimer;
-    private JButton actionEffacer;
-    private JButton actionRetour;
-    private JButton actionAfficher;
-    private JList<Client> clientList;
-    private DefaultListModel<Client> listModel;
-    private JTable clientTable;
 
-    public ClientView(FAccueilController fAccueilController) {
+    private static ClientView instance; // Instance unique de ClientView
+
+    private JPanel contentPane;
+    private JTextField txtNomClient, txtPrenomClient, txtNumeroClient, txtMailClient;
+    private JButton btnAjouter, btnModifier, btnSupprimer, btnEffacer, btnAfficher, btnRetour;
+    private JTable tableClient;
+    private DefaultTableModel tableModel;
+
+    // Constructeur privé pour empêcher l'instanciation directe
+    public ClientView() {
         setTitle("Gestion des Clients");
-        setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         initUI();
     }
 
+
+    // Méthode pour obtenir l'instance unique de ClientView
+    public static ClientView getInstance() {
+        if (instance == null) {
+            instance = new ClientView();
+        }
+        return instance;
+    }
+
     private void initUI() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 10, 10, 10);
+        contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout(10, 10));
+        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setContentPane(contentPane);
 
-        JLabel nomLabel = new JLabel("Nom:");
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(nomLabel, gbc);
+        // Haut : Formulaire
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(new TitledBorder("Détails du Client"));
 
-        nomClient = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        panel.add(nomClient, gbc);
+        txtNomClient = createLabeledField(formPanel, "Nom");
+        txtPrenomClient = createLabeledField(formPanel, "Prénom");
+        txtNumeroClient = createLabeledField(formPanel, "Numéro");
+        txtMailClient = createLabeledField(formPanel, "Mail");
 
-        JLabel prenomLabel = new JLabel("Prénom:");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(prenomLabel, gbc);
+        contentPane.add(formPanel, BorderLayout.NORTH);
 
-        prenomClient = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        panel.add(prenomClient, gbc);
+        // Centre : Table
+        tableModel = new DefaultTableModel(new String[]{"Nom", "Prénom", "Numéro", "Mail"}, 0);
+        tableClient = new JTable(tableModel);
+        JScrollPane tableScroll = new JScrollPane(tableClient);
+        tableScroll.setBorder(new TitledBorder("Liste des Clients"));
+        contentPane.add(tableScroll, BorderLayout.CENTER);
 
-        JLabel numeroLabel = new JLabel("Numéro:");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(numeroLabel, gbc);
+        // Bas : Boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        btnAjouter = createButton(buttonPanel, "Ajouter");
+        btnModifier = createButton(buttonPanel, "Modifier");
+        btnSupprimer = createButton(buttonPanel, "Supprimer");
+        btnEffacer = createButton(buttonPanel, "Effacer");
+        btnAfficher = createButton(buttonPanel, "Afficher");
+        btnRetour = createButton(buttonPanel, "Retour");
 
-        numeroClient = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        panel.add(numeroClient, gbc);
-
-        JLabel mailLabel = new JLabel("Mail:");
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(mailLabel, gbc);
-
-        mailClient = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        panel.add(mailClient, gbc);
-
-        actionAjouter = new JButton("Ajouter");
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 1;
-        panel.add(actionAjouter, gbc);
-
-        actionModifier = new JButton("Modifier");
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        gbc.gridwidth = 1;
-        panel.add(actionModifier, gbc);
-
-        actionSupprimer = new JButton("Supprimer");
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 1;
-        panel.add(actionSupprimer, gbc);
-
-        actionEffacer = new JButton("Effacer");
-        gbc.gridx = 1;
-        gbc.gridy = 5;
-        gbc.gridwidth = 1;
-        panel.add(actionEffacer, gbc);
-
-        actionAfficher = new JButton("Afficher");
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 1;
-        panel.add(actionAfficher, gbc);
-
-        listModel = new DefaultListModel<>();
-        clientList = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(clientList);
-        scrollPane.setPreferredSize(new Dimension(500, 200));
-        gbc.gridx = 0;
-        gbc.gridy = 7;
-        gbc.gridwidth = 2;
-        panel.add(scrollPane, gbc);
-
-        clientTable = new JTable();
-        JScrollPane scrollPaneTable = new JScrollPane(clientTable);
-        scrollPaneTable.setPreferredSize(new Dimension(500, 200));
-        gbc.gridx = 0;
-        gbc.gridy = 7;
-        gbc.gridwidth = 2;
-        panel.add(scrollPaneTable, gbc);
-        
-
-        actionRetour = new JButton("Retour à l'accueil");
-        gbc.gridx = 0;
-        gbc.gridy = 8;
-        gbc.gridwidth = 2;
-        panel.add(actionRetour, gbc);
-
-        add(panel);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public JTextField getNomClient() {
-        return nomClient;
+    private JTextField createLabeledField(JPanel panel, String label) {
+        JLabel lbl = new JLabel(label + ":");
+        lbl.setFont(new Font("Arial", Font.PLAIN, 14));
+        JTextField txt = new JTextField();
+        txt.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(lbl);
+        panel.add(txt);
+        return txt;
     }
 
-    public JTextField getPrenomClient() {
-        return prenomClient;
+    private JButton createButton(JPanel panel, String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        panel.add(button);
+        return button;
     }
 
-    public JTextField getNumeroClient() {
-        return numeroClient;
+    // Méthodes pour gérer les actions des boutons
+    public void setAjouterActionListener(ActionListener listener) {
+        btnAjouter.addActionListener(listener);
     }
 
-    public JTextField getMailClient() {
-        return mailClient;
+    public void setModifierActionListener(ActionListener listener) {
+        btnModifier.addActionListener(listener);
     }
 
-    public JButton getActionAjouter() {
-        return actionAjouter;
+    public void setSupprimerActionListener(ActionListener listener) {
+        btnSupprimer.addActionListener(listener);
     }
 
-    public JButton getActionModifier() {
-        return actionModifier;
+    public void setEffacerActionListener(ActionListener listener) {
+        btnEffacer.addActionListener(listener);
     }
 
-    public JButton getActionSupprimer() {
-        return actionSupprimer;
+    public void setAfficherActionListener(ActionListener listener) {
+        btnAfficher.addActionListener(listener);
     }
 
-    public JButton getActionEffacer() {
-        return actionEffacer;
+    public void setRetourActionListener(ActionListener listener) {
+        btnRetour.addActionListener(listener);
     }
 
-    public JButton getActionRetour() {
-        return actionRetour;
+    public void clearTable() {
+        tableModel.setRowCount(0);
     }
 
-    public JButton getActionAfficher() {
-        return actionAfficher;
+    // Getters pour récupérer les valeurs saisies
+    public String getTxtNomClient() {
+        return txtNomClient.getText();
     }
 
-    public JList<Client> getClientList() {
-        return clientList;
+    public String getTxtPrenomClient() {
+        return txtPrenomClient.getText();
+    }
+
+    public String getTxtNumeroClient() {
+        return txtNumeroClient.getText();
+    }
+
+    public String getTxtMailClient() {
+        return txtMailClient.getText();
+    }
+
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     public void afficherClientsDansTable(List<Client> clients) {
-        DefaultTableModel model = (DefaultTableModel) clientTable.getModel();
-        model.addColumn("Nom");
-        model.addColumn("Prénom");
-        model.addColumn("Numéro");
-        model.addColumn("Mail");
-        model.setRowCount(0); // Clear the table
+        DefaultTableModel model = (DefaultTableModel) tableClient.getModel();
+        model.setRowCount(0); // Effacer le tableau
         for (Client client : clients) {
-            model.addRow(new Object[]{client.getNom(), client.getPrenom(), client.getNumero(), client.getMail()});
+            model.addRow(new Object[]{
+                    client.getNom(),
+                    client.getPrenom(),
+                    client.getNumero(),
+                    client.getMail()
+            });
         }
     }
 
-    public void updateClientList(List<Client> clients) {
-        listModel.clear();
-        if (clients != null) {
-            for (Client client : clients) {
-                listModel.addElement(client);
-            }
-        }
+    public void clearFields() {
+        txtNomClient.setText("");
+        txtPrenomClient.setText("");
+        txtNumeroClient.setText("");
+        txtMailClient.setText("");
     }
 
-    public void showMessage(String s) {
-        JOptionPane.showMessageDialog(this, s);
+    public JTable getTableClient() {
+        return tableClient;
     }
 }
