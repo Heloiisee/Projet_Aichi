@@ -25,22 +25,23 @@ public class Clientcontroller {
     public Clientcontroller(ClientView view) {
         this.view = view;
         this.userDAO = new UserDAO();
+        initController();
     }
 
     public void initController() {
-        view.getActionAjouter().addActionListener(e -> ajouterClient());
-        view.getActionModifier().addActionListener(e -> modifierClient());
-        view.getActionSupprimer().addActionListener(e -> supprimerClient());
-        view.getActionEffacer().addActionListener(e -> effacerSaisie());
-        view.getActionAfficher().addActionListener(e -> afficherClients());
-        view.getActionRetour().addActionListener(e -> retourAccueil());
+        view.setAjouterActionListener(e -> ajouterClient());
+        view.setModifierActionListener(e -> modifierClient());
+        view.setSupprimerActionListener(e -> supprimerClient());
+        view.setEffacerActionListener(e -> effacerSaisie());
+        view.setAfficherActionListener(e -> afficherClients());
+        view.setRetourActionListener(e -> retourAccueil());
     }
 
-    private void ajouterClient() {
-        String nom = view.getNomClient().getText();
-        String prenom = view.getPrenomClient().getText();
-        String numero = view.getNumeroClient().getText();
-        String mail = view.getMailClient().getText();
+    public void ajouterClient() {
+        String nom = view.getTxtNomClient();
+        String prenom = view.getTxtPrenomClient();
+        String numero = view.getTxtNumeroClient();
+        String mail = view.getTxtMailClient();
 
         if (nom.isEmpty() || prenom.isEmpty() || numero.isEmpty() || mail.isEmpty()) {
             JOptionPane.showMessageDialog(view, "Veuillez remplir tous les champs.");
@@ -52,27 +53,25 @@ public class Clientcontroller {
             userDAO.ajouterClient(client);
             view.showMessage("Client ajouté avec succès !");
             clients.add(client);
-            view.updateClientList(clients);
+            view.afficherClientsDansTable(clients);
             effacerSaisie();
-            List<Client> updatedClients = userDAO.getClientList();
-            view.afficherClientsDansTable(updatedClients);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(view, "Erreur lors de l'ajout du client: " + e.getMessage());
         }
     }
 
-    private void modifierClient() {
-        int selectedIndex = view.getClientList().getSelectedIndex();
-        if (selectedIndex != -1) {
-            Client client = clients.get(selectedIndex);
-            client.setNom(view.getNomClient().getText());
-            client.setPrenom(view.getPrenomClient().getText());
-            client.setNumero(view.getNumeroClient().getText());
-            client.setMail(view.getMailClient().getText());
+    public void modifierClient() {
+        int selectedRow = view.getTableClient().getSelectedRow();
+        if (selectedRow != -1) {
+            Client client = clients.get(selectedRow);
+            client.setNom(view.getTxtNomClient());
+            client.setPrenom(view.getTxtPrenomClient());
+            client.setNumero(view.getTxtNumeroClient());
+            client.setMail(view.getTxtMailClient());
             try {
                 userDAO.modifierClient(client);
                 view.showMessage("Client modifié avec succès !");
-                view.updateClientList(clients);
+                view.afficherClientsDansTable(clients);
                 effacerSaisie();
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(view, "Erreur lors de la modification du client: " + e.getMessage());
@@ -82,14 +81,14 @@ public class Clientcontroller {
         }
     }
 
-    private void supprimerClient() {
-        int selectedIndex = view.getClientList().getSelectedIndex();
-        if (selectedIndex != -1) {
-            Client client = clients.get(selectedIndex);
+    public void supprimerClient() {
+        int selectedRow = view.getTableClient().getSelectedRow();
+        if (selectedRow != -1) {
+            Client client = clients.get(selectedRow);
             try {
                 userDAO.supprimerClient(client.getId());
-                clients.remove(selectedIndex);
-                view.updateClientList(clients);
+                clients.remove(selectedRow);
+                view.afficherClientsDansTable(clients);
                 effacerSaisie();
                 view.showMessage("Client supprimé avec succès !");
             } catch (SQLException e) {
@@ -100,21 +99,18 @@ public class Clientcontroller {
         }
     }
 
-    private void effacerSaisie() {
-        view.getNomClient().setText("");
-        view.getPrenomClient().setText("");
-        view.getNumeroClient().setText("");
-        view.getMailClient().setText("");
+    public void effacerSaisie() {
+        view.clearFields();
     }
 
-    private void retourAccueil() {
+    public void retourAccueil() {
         view.setVisible(false);
     }
 
     public void afficherClients() {
         try {
             clients = userDAO.getClientList();
-            view.updateClientList(clients);
+            view.afficherClientsDansTable(clients);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(view, "Erreur lors de l'affichage des clients: " + e.getMessage());
         }
