@@ -96,7 +96,7 @@ public class FArticlesView extends JDialog {
         GridBagLayout gbl_panel_formulaire = new GridBagLayout();
         panel_formulaire.setLayout(gbl_panel_formulaire);
 
-        JLabel lblLibelle = new JLabel("Libellé");
+        JLabel lblLibelle = new JLabel("LibellÃ©");
         GridBagConstraints gbc_lblLibelle = new GridBagConstraints();
         gbc_lblLibelle.anchor = GridBagConstraints.WEST;
         gbc_lblLibelle.insets = new Insets(5, 5, 5, 5);
@@ -188,6 +188,11 @@ public class FArticlesView extends JDialog {
         btnAfficher.setHorizontalAlignment(SwingConstants.LEFT);
         btnAfficher.setForeground(Color.BLACK);
 
+        JButton btnRechercher = new JButton("Rechercher");
+        toolBar.add(btnRechercher);
+        btnRechercher.setHorizontalAlignment(SwingConstants.LEFT);
+        btnRechercher.setForeground(Color.BLACK);
+
         // Ajouter les listeners aux boutons
         btnAjouter.addActionListener(e -> {
             if (ajouterListener != null) {
@@ -218,6 +223,17 @@ public class FArticlesView extends JDialog {
                 afficherListener.actionPerformed(e);
             }
         });
+
+        btnRechercher.addActionListener(e -> {
+            String texteRecherche = txtRecherche.getText().trim();
+            if (texteRecherche.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Veuillez saisir un critère de recherche.");
+            } else {
+                List<Article> articlesTrouves = model.UserDAO.rechercherArticlesParNom(texteRecherche);
+                afficherArticlesDansTable(articlesTrouves);
+            }
+        });
+
 
         table = new JTable();
         JScrollPane scrollPane = new JScrollPane(table);
@@ -290,12 +306,41 @@ public class FArticlesView extends JDialog {
 
     }
 
+    public void updateArticle(Article article) {
+        txtLibelle.setText(article.getLibelle());
+        txtDescription.setText(article.getDescription());
+        txtPrix.setValue(article.getPrix());
+        sliderStock.setValue(article.getStock());
+    }
+
+    public void afficherArticlesDansTable(List<Article> articles) {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("ID");
+        model.addColumn("Libellé");
+        model.addColumn("Description");
+        model.addColumn("Prix");
+        model.addColumn("Stock");
+
+        for (Article article : articles) {
+            model.addRow(new Object[]{article.getId(), article.getLibelle(), article.getDescription(), article.getPrix(), article.getStock()});
+        }
+
+        table.setModel(model);
+    }
+
+    public void updateArticleList(List<Article> articles) {
+        DefaultListModel<Article> model = new DefaultListModel<>();
+        for (Article article : articles) {
+            model.addElement(article);
+        }
+    }
+
     private class ActionAccueil extends AbstractAction {
         private static final long serialVersionUID = 1L;
 
         public ActionAccueil() {
             putValue(NAME, "Accueil");
-            putValue(SHORT_DESCRIPTION, "Retourner sur l'écran d'accueil");
+            putValue(SHORT_DESCRIPTION, "Retourner sur l'Ã©cran d'accueil");
         }
 
         public void actionPerformed(ActionEvent e) {
@@ -312,7 +357,7 @@ public class FArticlesView extends JDialog {
     }
 
     private void bouton_mode_ajout_ou_edition(boolean ajout) {
-        // Récupérer les boutons de la toolbar
+        // RÃ©cupÃ©rer les boutons de la toolbar
         Component[] components = toolBar.getComponents();
         for (Component component : components) {
             if (component instanceof JButton) {
@@ -320,7 +365,7 @@ public class FArticlesView extends JDialog {
                 if (button.getText().equals("Ajouter")) {
                     button.setEnabled(ajout);
                 } else if (button.getText().equals("Modifier")) {
-                    button.setEnabled(!ajout);
+                    button.setEnabled(ajout);
                 } else if (button.getText().equals("Supprimer")) {
                     button.setEnabled(!ajout);
                 } else if (button.getText().equals("Effacer")) {
