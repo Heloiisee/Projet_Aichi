@@ -1,3 +1,4 @@
+
 package model;
 
 import java.sql.*;
@@ -228,12 +229,12 @@ public class UserDAO {
 
     public void modifierArticle(Article article) {
         String sql = "UPDATE articles SET libellé = ?, description = ?, prix = ?, stock = ? WHERE id = ?";
-        try (Connection conn = getConnection()) {
-            if (conn == null) {
+        try {
+            if (connection == null || connection.isClosed()) {
                 System.err.println("Impossible de modifier l'article : connexion à la base de données échouée.");
                 return;
             }
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setString(1, article.getLibelle());
                 stmt.setString(2, article.getDescription());
                 stmt.setDouble(3, article.getPrix());
@@ -247,4 +248,35 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+
+    public static List<Article> rechercherArticlesParNom(String texteRecherche) {
+        List<Article> articles = new ArrayList<>();
+        String sql = "SELECT * FROM articles WHERE libellé LIKE ?";
+        try {
+            if (connection == null || connection.isClosed()) {
+                System.err.println("Connexion à la base de données échouée.");
+                return articles;
+            }
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, "%" + texteRecherche + "%");
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String libelle = rs.getString("libellé");
+                    String description = rs.getString("description");
+                    double prix = rs.getDouble("prix");
+                    int stock = rs.getInt("stock");
+
+                    articles.add(new Article(id, libelle, description, prix, stock));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return articles;
+    }
+
+
+
 }
+
