@@ -1,3 +1,4 @@
+
 package model;
 
 import java.sql.*;
@@ -221,4 +222,31 @@ public class UserDAO {
         }
         return articles;
     }
+
+    public List<Client> rechercherClientsParNom(String nom) {
+        List<Client> clients = new ArrayList<>();
+        String query = "SELECT * FROM clients WHERE nom LIKE ?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, "%" + nom + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Client client = new Client(
+                            rs.getInt("id"),
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            rs.getString("numero"),
+                            rs.getString("mail")
+                    );
+                    clients.add(client);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return clients;
+    }
+
+
 }
