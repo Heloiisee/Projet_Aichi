@@ -4,6 +4,8 @@ import model.Client;
 import model.UserDAO;
 import view.ClientView;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -18,7 +20,6 @@ public class Clientcontroller {
         this.view = view;
         this.clients = clients;
         this.userDAO = new UserDAO();
-
         initController();
     }
 
@@ -35,6 +36,7 @@ public class Clientcontroller {
         view.setEffacerActionListener(e -> effacerSaisie());
         view.setAfficherActionListener(e -> afficherClients());
         view.setRetourActionListener(e -> retourAccueil());
+        view.setRechercherActionListener(new RechercherClientListener()); // Ajout du Listener pour la recherche
     }
 
     public void ajouterClient() {
@@ -103,16 +105,34 @@ public class Clientcontroller {
         view.clearFields();
     }
 
-    public void retourAccueil() {
-        view.setVisible(false);
-    }
-
     public void afficherClients() {
         try {
             clients = userDAO.getClientList();
             view.afficherClientsDansTable(clients);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(view, "Erreur lors de l'affichage des clients: " + e.getMessage());
+        }
+    }
+
+    public void retourAccueil() {
+        view.setVisible(false);
+    }
+
+    class RechercherClientListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String nomRecherche = view.getTxtRechercheClient();
+            if (nomRecherche.isEmpty()) {
+                view.showMessage("Veuillez entrer un nom pour la recherche.");
+                return;
+            }
+
+            List<Client> resultats = userDAO.rechercherClientsParNom(nomRecherche);
+            if (resultats.isEmpty()) {
+                view.showMessage("Aucun client trouvé.");
+            } else {
+                view.afficherClientsDansTable(resultats);
+            }
         }
     }
 }
