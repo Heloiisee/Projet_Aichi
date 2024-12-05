@@ -1,4 +1,3 @@
-
 package model;
 
 import java.sql.*;
@@ -23,15 +22,6 @@ public class UserDAO {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 
-    public void ajoutUser(User user) throws SQLException {
-        String query = "INSERT INTO users (login, mdp) VALUES (?, ?)";
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, user.getLogin());
-            preparedStatement.setString(2, user.getMdp());
-            preparedStatement.executeUpdate();
-        }
-    }
 
     public boolean verifierUser(User user) throws SQLException {
         String query = "SELECT mdp FROM users WHERE login = ?";
@@ -56,6 +46,7 @@ public class UserDAO {
             preparedStatement.setString(3, client.getNumero());
             preparedStatement.setString(4, client.getEmail());
             preparedStatement.executeUpdate();
+
         }
     }
 
@@ -96,22 +87,6 @@ public class UserDAO {
             preparedStatement.setString(4, client.getEmail());
             preparedStatement.setInt(5, client.getId());
             preparedStatement.executeUpdate();
-        }
-    }
-
-    public void afficherClients() throws SQLException {
-        String query = "SELECT * FROM clients";
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                System.out.println("ID: " + resultSet.getInt("id"));
-                System.out.println("Nom: " + resultSet.getString("nom"));
-                System.out.println("Prénom: " + resultSet.getString("prenom"));
-                System.out.println("Numéro: " + resultSet.getString("numero"));
-                System.out.println("Email: " + resultSet.getString("email"));
-                System.out.println();
-            }
         }
     }
 
@@ -222,31 +197,4 @@ public class UserDAO {
         }
         return articles;
     }
-
-    public List<Client> rechercherClientsParNom(String nom) {
-        List<Client> clients = new ArrayList<>();
-        String query = "SELECT * FROM clients WHERE nom LIKE ?";
-
-        try (Connection connection = getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, "%" + nom + "%");
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Client client = new Client(
-                            rs.getInt("id"),
-                            rs.getString("nom"),
-                            rs.getString("prenom"),
-                            rs.getString("numero"),
-                            rs.getString("mail")
-                    );
-                    clients.add(client);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return clients;
-    }
-
-
 }
