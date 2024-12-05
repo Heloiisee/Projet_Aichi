@@ -13,9 +13,6 @@ import java.util.List;
 public class ClientView extends JFrame {
 
     private static ClientView instance; // Instance unique de ClientView
-    private JTextField txtRechercheClient;
-    private JButton btnRechercherClient;
-
 
     private JPanel contentPane;
     private JTextField txtNomClient, txtPrenomClient, txtNumeroClient, txtMailClient;
@@ -33,6 +30,7 @@ public class ClientView extends JFrame {
     }
 
 
+
     // Méthode pour obtenir l'instance unique de ClientView
     public static ClientView getInstance() {
         if (instance == null) {
@@ -42,45 +40,30 @@ public class ClientView extends JFrame {
     }
 
     private void initUI() {
-        contentPane = new JPanel(new BorderLayout());
+        contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout(10, 10));
+        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setContentPane(contentPane);
 
-        // Ajout du champ de recherche et du bouton
-        JPanel recherchePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        txtRechercheClient = new JTextField(20);
-        btnRechercherClient = new JButton("Rechercher");
-        recherchePanel.add(new JLabel("Rechercher un client:"));
-        recherchePanel.add(txtRechercheClient);
-        recherchePanel.add(btnRechercherClient);
-        contentPane.add(recherchePanel, BorderLayout.NORTH);
-
-        // Formulaire (placé à gauche)
-        JPanel formPanel = new JPanel(new GridBagLayout());
+        // Haut : Formulaire
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
         formPanel.setBorder(new TitledBorder("Détails du Client"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
 
-        txtNomClient = createLabeledField(formPanel, "Nom", gbc);
-        gbc.gridy++;
-        txtPrenomClient = createLabeledField(formPanel, "Prénom", gbc);
-        gbc.gridy++;
-        txtNumeroClient = createLabeledField(formPanel, "Numéro", gbc);
-        gbc.gridy++;
-        txtMailClient = createLabeledField(formPanel, "Mail", gbc);
+        txtNomClient = createLabeledField(formPanel, "Nom");
+        txtPrenomClient = createLabeledField(formPanel, "Prénom");
+        txtNumeroClient = createLabeledField(formPanel, "Numéro");
+        txtMailClient = createLabeledField(formPanel, "Mail");
 
-        contentPane.add(formPanel, BorderLayout.WEST);
+        contentPane.add(formPanel, BorderLayout.NORTH);
 
-        // Table (au centre)
+        // Centre : Table
         tableModel = new DefaultTableModel(new String[]{"Nom", "Prénom", "Numéro", "Mail"}, 0);
         tableClient = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(tableClient);
         tableScroll.setBorder(new TitledBorder("Liste des Clients"));
         contentPane.add(tableScroll, BorderLayout.CENTER);
 
-        // Boutons (en bas)
+        // Bas : Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         btnAjouter = createButton(buttonPanel, "Ajouter");
         btnModifier = createButton(buttonPanel, "Modifier");
@@ -88,25 +71,19 @@ public class ClientView extends JFrame {
         btnEffacer = createButton(buttonPanel, "Effacer");
         btnAfficher = createButton(buttonPanel, "Afficher");
         btnRetour = createButton(buttonPanel, "Retour");
+
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-
-
-    private JTextField createLabeledField(JPanel panel, String label, GridBagConstraints gbc) {
+    private JTextField createLabeledField(JPanel panel, String label) {
         JLabel lbl = new JLabel(label + ":");
         lbl.setFont(new Font("Arial", Font.PLAIN, 14));
-        gbc.gridx = 0;
-        panel.add(lbl, gbc);
-
-        JTextField txt = new JTextField(20);
+        JTextField txt = new JTextField();
         txt.setFont(new Font("Arial", Font.PLAIN, 14));
-        gbc.gridx = 1;
-        panel.add(txt, gbc);
-
+        panel.add(lbl);
+        panel.add(txt);
         return txt;
     }
-
 
     private JButton createButton(JPanel panel, String text) {
         JButton button = new JButton(text);
@@ -140,9 +117,7 @@ public class ClientView extends JFrame {
         btnRetour.addActionListener(listener);
     }
 
-    public void clearTable() {
-        tableModel.setRowCount(0);
-    }
+
 
     // Getters pour récupérer les valeurs saisies
     public String getTxtNomClient() {
@@ -161,9 +136,6 @@ public class ClientView extends JFrame {
         return txtMailClient.getText();
     }
 
-    public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
-    }
 
     public void afficherClientsDansTable(List<Client> clients) {
         DefaultTableModel model = (DefaultTableModel) tableClient.getModel();
@@ -188,15 +160,4 @@ public class ClientView extends JFrame {
     public JTable getTableClient() {
         return tableClient;
     }
-
-    public String getTxtRechercheClient() {
-        return txtRechercheClient.getText();
-    }
-
-    public void setRechercherActionListener(ActionListener listener) {
-        btnRechercherClient.addActionListener(listener);
-    }
-
-
-
 }
