@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
 public class FArticlesView extends JDialog {
 
     private static final long serialVersionUID = 1L;
-
+    private static FArticlesView instance;
     private JPanel contentPane;
     private JTable table;
     private JTextField txtLibelle;
@@ -35,12 +35,15 @@ public class FArticlesView extends JDialog {
     private JToolBar toolBar;
     private ActionListener afficherListener;
 
-    public FArticlesView(FAccueilController connexionDAO) {
+    public FArticlesView() {
         setTitle("Gestion des Articles");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 1000, 700);
         setLocationRelativeTo(null);
         createContents();
+    }
+
+    public static FArticlesView getInstance() { if (instance == null) { instance = new FArticlesView(); } return instance;
     }
 
     private void createContents() {
@@ -335,6 +338,15 @@ public class FArticlesView extends JDialog {
         }
     }
 
+    public JTable getTableArticles() {
+        return table;
+    }
+
+    public void supprimerArticleDeTable(int selectedRow) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.removeRow(selectedRow);
+    }
+
     private class ActionAccueil extends AbstractAction {
         private static final long serialVersionUID = 1L;
 
@@ -367,7 +379,7 @@ public class FArticlesView extends JDialog {
                 } else if (button.getText().equals("Modifier")) {
                     button.setEnabled(ajout);
                 } else if (button.getText().equals("Supprimer")) {
-                    button.setEnabled(!ajout);
+                    button.setEnabled(ajout);
                 } else if (button.getText().equals("Effacer")) {
                     button.setEnabled(true);
                 }
