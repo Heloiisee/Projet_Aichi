@@ -1,15 +1,21 @@
 package model;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+/**
+ * @Author Melissa
+ * Modèle de la classe CommandeDAO
+ * @version 1.0
+ */
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class  CommandeDAO {
+/**
+ * Classe CommandeDAO
+ */
+
+public class CommandeDAO {
     public static Connection connection;
 
     public CommandeDAO() {
@@ -34,37 +40,18 @@ public class  CommandeDAO {
 
     public void ajouterCommande(Commande commande) {
         try {
-            String query = "INSERT INTO commande (id_client, id_article, nom_commande, date, statut, prix) VALUES (?, ?, ?, ?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            String query = "INSERT INTO commande (id_client, date_Commande, statut) VALUES (?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, commande.getIdClient());
-            preparedStatement.setInt(2, commande.getIdArticle());
-            preparedStatement.setString(3, commande.getNomCommande());
-            preparedStatement.setDate(4, new java.sql.Date(commande.getDateCommande().getTime()));
-            preparedStatement.setString(5, commande.getStatut());
-            preparedStatement.setInt(6, commande.getPrixTotal());
+            preparedStatement.setDate(2, new java.sql.Date(commande.getDate_Commande().getTime()));
+            preparedStatement.setString(3, commande.getStatut());
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    public void afficherCommandes() {
-        try {
-            String query = "SELECT * FROM commande";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                System.out.println("Commande{" +
-                        "id=" + resultSet.getInt("id") +
-                        ", idclient=" + resultSet.getInt("id_client") +
-                        ", idArticle=" + resultSet.getInt("id_article") +
-                        ", nomCommande='" + resultSet.getString("nom_commande") + '\'' +
-                        ", date='" + resultSet.getDate("date") + '\'' +
-                        ", statut='" + resultSet.getString("statut") + '\'' +
-                        ", prix=" + resultSet.getInt("prix") +
-                        '}');
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                commande.setNCommande(generatedKeys.getInt(1));
             }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -72,26 +59,24 @@ public class  CommandeDAO {
 
     public void modifierCommande(Commande commande) {
         try {
-            String query = "UPDATE commande SET id_client = ?, id_article = ?, nom_commande = ?, date = ?, statut = ?, prix = ? WHERE id = ?";
+            String query = "UPDATE commande SET id_client = ?, date_Commande = ?, statut = ? WHERE nCommande = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, commande.getIdClient());
-            preparedStatement.setInt(2, commande.getIdArticle());
-            preparedStatement.setString(3, commande.getNomCommande());
-            preparedStatement.setDate(4, new java.sql.Date(commande.getDateCommande().getTime()));
-            preparedStatement.setString(5, commande.getStatut());
-            preparedStatement.setInt(6, commande.getPrixTotal());
-            preparedStatement.setInt(7, commande.getId());
+            preparedStatement.setDate(2, new java.sql.Date(commande.getDate_Commande().getTime()));
+            preparedStatement.setString(3, commande.getStatut());
+            preparedStatement.setInt(4, commande.getNCommande());
+
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void supprimerCommande(int id) {
+    public void supprimerCommande(int nCommande) {
         try {
-            String query = "DELETE FROM commande WHERE id = ?";
+            String query = "DELETE FROM commande WHERE nCommande = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(1, nCommande);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -106,15 +91,12 @@ public class  CommandeDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                int nCommande = resultSet.getInt("nCommande");
                 int id_client = resultSet.getInt("id_client");
-                int id_article = resultSet.getInt("id_article");
-                String nom_commande = resultSet.getString("nom_commande");
-                Date date = resultSet.getDate("date");
+                Date dateCommande = resultSet.getDate("date_Commande");
                 String statut = resultSet.getString("statut");
-                int prix = resultSet.getInt("prix");
 
-                Commande commande = new Commande(id, id_client, id_article, nom_commande, date, statut, prix);
+                Commande commande = new Commande(nCommande, id_client, dateCommande, statut);
                 commandes.add(commande);
             }
         } catch (SQLException e) {
@@ -123,5 +105,23 @@ public class  CommandeDAO {
         return commandes;
     }
 
+    public Commande getCommandeById(int nCommande) {
+        try {
+            String query = "SELECT * FROM commande WHERE nCommande = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, nCommande);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
+            if (resultSet.next()) {
+                int id_client = resultSet.getInt("id_client");
+                Date dateCommande = resultSet.getDate("date_Commande");
+                String statut = resultSet.getString("statut");
+
+                return new Commande(nCommande, id_client, dateCommande, statut);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 }
