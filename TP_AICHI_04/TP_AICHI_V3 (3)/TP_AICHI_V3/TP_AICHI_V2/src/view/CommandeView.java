@@ -8,7 +8,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.sql.*;
 import java.util.List;
 import java.util.Vector;
 
@@ -22,15 +21,7 @@ public class CommandeView extends JFrame {
     private JTable tableCommande;
     private DefaultTableModel tableModel;
 
-    public CommandeView() {
-        setTitle("Gestion des Commandes");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        initUI();
-    }
-
-    public CommandeView(FAccueilController fAccueilController) {
+    private CommandeView() {  // Private constructor for Singleton
         setTitle("Gestion des Commandes");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -137,10 +128,6 @@ public class CommandeView extends JFrame {
 
     public String getTxtStatut() {
         return txtStatut.getText();
-    }
-
-    public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
     }
 
     public void afficherCommandesDansTable(List<Commande> commandes) {
