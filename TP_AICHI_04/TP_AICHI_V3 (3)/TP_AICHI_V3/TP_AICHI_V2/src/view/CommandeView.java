@@ -8,19 +8,20 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.sql.*;
 import java.util.List;
+import java.util.Vector;
 
 public class CommandeView extends JFrame {
 
-    private static CommandeView instance; // Instance unique de CommandeView
+    private static CommandeView instance;
 
     private JPanel contentPane;
-    private JTextField txtIdClient, txtIdArticle, txtDateCommande, txtNomCommande, txtStatut, txtPrixTotal;
-    private JButton btnValider, btnEffacer, btnAfficher, btnRetour, btnSupprimer, btnModifier;
+    private JTextField txtIdClient, txtDateCommande, txtStatut;
+    private JButton btnValider, btnEffacer, btnAfficher, btnRetour, btnSupprimer, btnModifier, btnDetails;
     private JTable tableCommande;
     private DefaultTableModel tableModel;
 
-    // Constructeur privé pour empêcher l'instanciation directe
     public CommandeView() {
         setTitle("Gestion des Commandes");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,6 +29,7 @@ public class CommandeView extends JFrame {
         setLocationRelativeTo(null);
         initUI();
     }
+
     public CommandeView(FAccueilController fAccueilController) {
         setTitle("Gestion des Commandes");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,7 +38,6 @@ public class CommandeView extends JFrame {
         initUI();
     }
 
-    // Méthode pour obtenir l'instance unique de CommandeView
     public static CommandeView getInstance() {
         if (instance == null) {
             instance = new CommandeView();
@@ -50,27 +51,21 @@ public class CommandeView extends JFrame {
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setContentPane(contentPane);
 
-        // Haut : Formulaire
-        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         formPanel.setBorder(new TitledBorder("Détails de la Commande"));
 
         txtIdClient = createLabeledField(formPanel, "ID Client");
-        txtIdArticle = createLabeledField(formPanel, "ID Article");
         txtDateCommande = createLabeledField(formPanel, "Date Commande");
-        txtNomCommande = createLabeledField(formPanel, "Nom Commande");
         txtStatut = createLabeledField(formPanel, "Statut");
-        txtPrixTotal = createLabeledField(formPanel, "Prix Total");
 
         contentPane.add(formPanel, BorderLayout.NORTH);
 
-        // Centre : Table
-        tableModel = new DefaultTableModel(new String[]{"ID", "ID Client", "ID Article", "Date", "Nom", "Statut", "Prix Total"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"Numéro de Commande", "ID Client", "Date", "Statut"}, 0);
         tableCommande = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(tableCommande);
         tableScroll.setBorder(new TitledBorder("Liste des Commandes"));
         contentPane.add(tableScroll, BorderLayout.CENTER);
 
-        // Bas : Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         btnValider = createButton(buttonPanel, "Valider");
         btnEffacer = createButton(buttonPanel, "Effacer");
@@ -78,6 +73,7 @@ public class CommandeView extends JFrame {
         btnSupprimer = createButton(buttonPanel, "Supprimer");
         btnModifier = createButton(buttonPanel, "Modifier");
         btnRetour = createButton(buttonPanel, "Retour");
+        btnDetails = createButton(buttonPanel, "Détails");
 
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
     }
@@ -99,7 +95,6 @@ public class CommandeView extends JFrame {
         return button;
     }
 
-    // Méthodes pour gérer les actions des boutons
     public void setValiderActionListener(ActionListener listener) {
         btnValider.addActionListener(listener);
     }
@@ -124,77 +119,62 @@ public class CommandeView extends JFrame {
         btnRetour.addActionListener(listener);
     }
 
-    public void addCommandeToTable(Commande commande) {
-        tableModel.addRow(new Object[]{
-                commande.getId(),
-                commande.getIdClient(),
-                commande.getIdArticle(),
-                commande.getDateCommande(),
-                commande.getNomCommande(),
-                commande.getStatut(),
-                commande.getPrixTotal()
-        });
+    public void setDetailsActionListener(ActionListener listener) {
+        btnDetails.addActionListener(listener);
     }
 
     public void clearTable() {
         tableModel.setRowCount(0);
     }
 
-    // Getters pour récupérer les valeurs saisies
     public String getTxtIdClient() {
         return txtIdClient.getText();
-    }
-
-    public String getTxtIdArticle() {
-        return txtIdArticle.getText();
     }
 
     public String getTxtDateCommande() {
         return txtDateCommande.getText();
     }
 
-    public String getTxtNomCommande() {
-        return txtNomCommande.getText();
-    }
-
     public String getTxtStatut() {
         return txtStatut.getText();
     }
 
-    public String getTxtPrixTotal() {
-        return txtPrixTotal.getText();
-    }
-
-    public void showMessage(String s) {
-        JOptionPane.showMessageDialog(this, s);
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     public void afficherCommandesDansTable(List<Commande> commandes) {
         DefaultTableModel model = (DefaultTableModel) tableCommande.getModel();
-        model.setRowCount(0); // Effacer le tableau
+        model.setRowCount(0);
         for (Commande commande : commandes) {
             model.addRow(new Object[]{
-                    commande.getId(),
+                    commande.getNCommande(),
                     commande.getIdClient(),
-                    commande.getIdArticle(),
-                    commande.getDateCommande(),
-                    commande.getNomCommande(),
-                    commande.getStatut(),
-                    commande.getPrixTotal()
+                    commande.getDate_Commande(),
+                    commande.getStatut()
             });
         }
     }
 
     public void clearFields() {
         txtIdClient.setText("");
-        txtIdArticle.setText("");
         txtDateCommande.setText("");
-        txtNomCommande.setText("");
         txtStatut.setText("");
-        txtPrixTotal.setText("");
     }
 
     public JTable getTableCommande() {
         return tableCommande;
+    }
+
+    public void addRow(Vector<String> row) {
+        tableModel.addRow(row);
+    }
+
+    public String getTxtNCommande() {
+        int selectedRow = tableCommande.getSelectedRow();
+        if (selectedRow == -1) {
+            return "";
+        }
+        return (String) tableModel.getValueAt(selectedRow, 0);
     }
 }
